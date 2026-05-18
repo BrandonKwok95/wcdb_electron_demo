@@ -228,7 +228,7 @@ interface Extra {
 
 ### `db.close()`
 
-关闭数据库并释放 native 侧持有的 WCDB Database 对象。
+关闭当前 `BusinessDb` 实例，后续继续调用其它接口会 reject `database is closed`。
 
 返回：
 
@@ -248,5 +248,6 @@ interface Extra {
 
 - 这是业务型封装，不提供通用 SQL 执行器，也不导出 WCDB 原始 API。
 - 当前所有 JS 接口基于 N-API `AsyncWorker`，数据库操作在线程池执行，不同步阻塞 JS 调用线程。
-- 同一个 `BusinessDb` 实例内部用 mutex 串行化 WCDB 访问，避免并发操作同时打到同一个 native database 对象。
+- 每个 worker 会基于同一个 `dbPath` 创建短生命周期的 `WCDB::Database` 句柄，避免多个异步 worker 共享同一个 native database 对象。
+- native 侧只用轻量 mutex 保护 `closed` / `initialized` 这类生命周期状态，不再把每个 CRUD 操作串行化。
 - 当前内置的是 Windows x64 版本的 WCDB 产物；后续如果要支持 macOS、Linux 或 arm64，可以在 `vendor/wcdb` 下继续按平台增加目录。

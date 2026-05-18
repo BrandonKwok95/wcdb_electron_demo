@@ -1,6 +1,7 @@
 #include "native_business_db.h"
 
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 namespace kwok::wcdb_addon {
@@ -450,7 +451,6 @@ NativeBusinessDb::NativeBusinessDb(const Napi::CallbackInfo& info)
     }
 
     dbPath_ = info[0].As<Napi::String>().Utf8Value();
-    database_ = std::make_unique<WCDB::Database>(dbPath_);
 }
 
 Napi::Object NativeBusinessDb::init(Napi::Env env, Napi::Object exports)
@@ -481,112 +481,115 @@ Napi::Object NativeBusinessDb::init(Napi::Env env, Napi::Object exports)
 
 bool NativeBusinessDb::initSync()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    if (!database_->canOpen()) {
-        throwLastErrorLocked("open database");
+    auto database = openDatabase(false);
+    BusinessItemService::initTable(database);
+    ExtraService::initTable(database);
+
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    if (closed_) {
+        throw std::runtime_error("database is closed");
     }
-    BusinessItemService::initTable(*database_);
-    ExtraService::initTable(*database_);
+    initialized_ = true;
     return true;
 }
 
 BusinessItem NativeBusinessDb::createBusinessItemSync(BusinessItem item)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return BusinessItemService::create(*database_, std::move(item));
+    auto database = openDatabase(true);
+    return BusinessItemService::create(database, std::move(item));
 }
 
 std::optional<BusinessItem> NativeBusinessDb::getBusinessItemSync(int64_t id)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return BusinessItemService::get(*database_, id);
+    auto database = openDatabase(true);
+    return BusinessItemService::get(database, id);
 }
 
 std::vector<BusinessItem> NativeBusinessDb::listBusinessItemsSync()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return BusinessItemService::list(*database_);
+    auto database = openDatabase(true);
+    return BusinessItemService::list(database);
 }
 
 bool NativeBusinessDb::updateBusinessItemSync(int64_t id, const BusinessItemPatch& patch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return BusinessItemService::update(*database_, id, patch);
+    auto database = openDatabase(true);
+    return BusinessItemService::update(database, id, patch);
 }
 
 bool NativeBusinessDb::removeBusinessItemSync(int64_t id)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return BusinessItemService::remove(*database_, id);
+    auto database = openDatabase(true);
+    return BusinessItemService::remove(database, id);
 }
 
 Extra NativeBusinessDb::createExtraSync(Extra item)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return ExtraService::create(*database_, std::move(item));
+    auto database = openDatabase(true);
+    return ExtraService::create(database, std::move(item));
 }
 
 std::optional<Extra> NativeBusinessDb::getExtraSync(int64_t id)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return ExtraService::get(*database_, id);
+    auto database = openDatabase(true);
+    return ExtraService::get(database, id);
 }
 
 std::vector<Extra> NativeBusinessDb::listExtrasSync()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return ExtraService::list(*database_);
+    auto database = openDatabase(true);
+    return ExtraService::list(database);
 }
 
 std::vector<Extra> NativeBusinessDb::listExtrasByBusinessItemIdSync(int64_t businessItemId)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return ExtraService::listByBusinessItemId(*database_, businessItemId);
+    auto database = openDatabase(true);
+    return ExtraService::listByBusinessItemId(database, businessItemId);
 }
 
 bool NativeBusinessDb::updateExtraSync(int64_t id, const ExtraPatch& patch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return ExtraService::update(*database_, id, patch);
+    auto database = openDatabase(true);
+    return ExtraService::update(database, id, patch);
 }
 
 bool NativeBusinessDb::removeExtraSync(int64_t id)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    ensureOpenLocked();
-    return ExtraService::remove(*database_, id);
+    auto database = openDatabase(true);
+    return ExtraService::remove(database, id);
 }
 
 void NativeBusinessDb::closeSync()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (database_) {
-        database_->close();
-        database_.reset();
-    }
+    std::lock_guard<std::mutex> lock(stateMutex_);
+    closed_ = true;
+    initialized_ = false;
 }
 
-void NativeBusinessDb::ensureOpenLocked()
+WCDB::Database NativeBusinessDb::openDatabase(bool requireInitialized)
 {
-    if (!database_) {
-        throw std::runtime_error("database is closed");
+    std::string dbPath;
+    {
+        std::lock_guard<std::mutex> lock(stateMutex_);
+        if (closed_) {
+            throw std::runtime_error("database is closed");
+        }
+        if (requireInitialized && !initialized_) {
+            throw std::runtime_error("database is not initialized");
+        }
+        dbPath = dbPath_;
     }
+
+    WCDB::Database database(dbPath);
+    if (!database.canOpen()) {
+        throwLastError(database, "open database");
+    }
+    return database;
 }
 
-void NativeBusinessDb::throwLastErrorLocked(const char* action)
+void NativeBusinessDb::throwLastError(WCDB::Database& database, const char* action)
 {
-    const WCDB::Error& error = database_->getError();
+    const WCDB::Error& error = database.getError();
     std::string message = std::string(action) + " failed";
     if (!error.getMessage().empty()) {
         message += ": ";

@@ -9,7 +9,6 @@
 #include <napi.h>
 
 #include <cstdint>
-#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -38,8 +37,8 @@ public:
     void closeSync();
 
 private:
-    void ensureOpenLocked();
-    void throwLastErrorLocked(const char* action);
+    WCDB::Database openDatabase(bool requireInitialized);
+    static void throwLastError(WCDB::Database& database, const char* action);
 
     Napi::Value initDb(const Napi::CallbackInfo& info);
     Napi::Value businessItemCreate(const Napi::CallbackInfo& info);
@@ -56,8 +55,9 @@ private:
     Napi::Value close(const Napi::CallbackInfo& info);
 
     std::string dbPath_;
-    std::unique_ptr<WCDB::Database> database_;
-    std::mutex mutex_;
+    bool closed_ = false;
+    bool initialized_ = false;
+    std::mutex stateMutex_;
 };
 
 Napi::Object toNapiObject(Napi::Env env, const BusinessItem& item);

@@ -138,6 +138,38 @@ const dbPath = prepareDbPath();
   assert.equal(await db.extra.get(secondExtra.id), null);
   assert.equal((await db.extra.listByBusinessItemId(created.id)).length, 1);
 
+  const concurrentItems = await Promise.all(
+    Array.from({ length: 12 }, (_value, index) =>
+      db.businessItem.create({
+        title: `concurrent ${index + 1}`,
+        content: "created through parallel async workers"
+      })
+    )
+  );
+  assert.equal(concurrentItems.length, 12);
+  assert.ok(concurrentItems.every((item) => item.id > 0));
+
+  const concurrentExtras = await Promise.all(
+    concurrentItems.slice(0, 6).map((item, index) =>
+      db.extra.create({
+        businessItemId: item.id,
+        key: `parallel-extra-${index + 1}`,
+        value: "created through parallel async workers"
+      })
+    )
+  );
+  assert.equal(concurrentExtras.length, 6);
+  assert.ok(concurrentExtras.every((item) => item.id > 0));
+
+  const [latestItems, latestExtras, firstConcurrentItem] = await Promise.all([
+    db.businessItem.list(),
+    db.extra.list(),
+    db.businessItem.get(concurrentItems[0].id)
+  ]);
+  assert.equal(latestItems.length, samples.length - 1 + concurrentItems.length);
+  assert.equal(latestExtras.length, 1 + 1 + concurrentExtras.length);
+  assert.equal(firstConcurrentItem.title, "concurrent 1");
+
   await db.close();
 
   console.log("wcdb addon smoke test passed:", dbPath);
