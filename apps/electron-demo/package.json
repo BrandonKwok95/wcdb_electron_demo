@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
-    "start": "electron ."
+    "start": "electron .",
+    "smoke": "WCDB_DEMO_SMOKE=1 electron ."
   },
   "dependencies": {
     "@kwok/wcdb-addon": "0.1.0"

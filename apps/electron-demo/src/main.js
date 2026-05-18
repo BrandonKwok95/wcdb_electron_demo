@@ -105,8 +105,39 @@ function createWindow() {
   mainWindow.loadFile(path.join(__dirname, "renderer", "index.html"));
 }
 
-app.whenReady().then(() => {
+async function runSmoke() {
+  const businessDb = await getDb();
+  const item = await businessDb.businessItem.create({
+    title: "electron smoke",
+    content: "created from Electron main process"
+  });
+  const extra = await businessDb.extra.create({
+    businessItemId: item.id,
+    key: "runtime",
+    value: "electron"
+  });
+  const loaded = await businessDb.businessItem.get(item.id);
+  const extras = await businessDb.extra.listByBusinessItemId(item.id);
+
+  if (!loaded || extras.length !== 1 || extras[0].id !== extra.id) {
+    throw new Error("Electron WCDB smoke validation failed");
+  }
+
+  console.log("electron demo smoke passed:", getDbPath());
+  const closingDb = db;
+  db = null;
+  await closingDb.close();
+  app.quit();
+}
+
+app.whenReady().then(async () => {
   registerWcdbHandlers();
+
+  if (process.env.WCDB_DEMO_SMOKE === "1") {
+    await runSmoke();
+    return;
+  }
+
   createWindow();
 
   app.on("activate", () => {

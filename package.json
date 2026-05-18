@@ -10,6 +10,7 @@
   "scripts": {
     "dev:electron": "npm run dev -w @wcdb-demo/electron",
     "start:electron": "npm run start -w @wcdb-demo/electron",
+    "smoke:electron": "npm run smoke -w @wcdb-demo/electron",
     "build:wcdb-addon": "npm run build -w @kwok/wcdb-addon",
     "test:wcdb-addon": "npm run test -w @kwok/wcdb-addon"
   },

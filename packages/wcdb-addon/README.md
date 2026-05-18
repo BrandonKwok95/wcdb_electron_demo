@@ -16,12 +16,12 @@ npm run build:wcdb-addon
 npm run test:wcdb-addon
 ```
 
-addon 链接仓库内置的 WCDB Windows x64 产物：
+addon 链接仓库内置的 WCDB 平台产物：
 
-- Headers: `packages/wcdb-addon/vendor/wcdb/windows-x64/include`
-- Libraries: `packages/wcdb-addon/vendor/wcdb/windows-x64/lib`
+- Windows x64: `packages/wcdb-addon/vendor/wcdb/windows-x64`
+- macOS arm64: `packages/wcdb-addon/vendor/wcdb/darwin-arm64`
 
-构建后会把 `WCDB.dll` 复制到 addon 的 `build/Release` 目录。
+构建后会把对应平台的运行时库复制到 addon 的 `build/Release` 目录。
 
 ## 使用示例
 
@@ -250,4 +250,4 @@ interface Extra {
 - 当前所有 JS 接口基于 N-API `AsyncWorker`，数据库操作在线程池执行，不同步阻塞 JS 调用线程。
 - 每个 worker 会基于同一个 `dbPath` 创建短生命周期的 `WCDB::Database` 句柄，避免多个异步 worker 共享同一个 native database 对象。
 - native 侧只用轻量 mutex 保护 `closed` / `initialized` 这类生命周期状态，不再把每个 CRUD 操作串行化。
-- 当前内置的是 Windows x64 版本的 WCDB 产物；后续如果要支持 macOS、Linux 或 arm64，可以在 `vendor/wcdb` 下继续按平台增加目录。
+- 当前内置的是 Windows x64 和 macOS arm64 版本的 WCDB 产物；后续如果要支持 Linux 或其他架构，可以在 `vendor/wcdb` 下继续按平台增加目录。
