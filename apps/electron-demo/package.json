@@ -1,0 +1,13 @@
+{
+  "name": "@wcdb-demo/electron",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@kwok/wcdb-addon": "0.1.0"
+  }
+}

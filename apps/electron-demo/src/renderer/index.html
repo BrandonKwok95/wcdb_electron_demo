@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WCDB Electron Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Electron + WCDB Addon</p>
+          <h1>WCDB CRUD Demo</h1>
+        </div>
+        <div class="runtime">
+          <span id="platform">unknown</span>
+          <span id="db-path">loading...</span>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="controls" aria-label="WCDB actions">
+          <div class="control-group">
+            <h2>Database</h2>
+            <button type="button" data-action="init">初始化 DB</button>
+            <button type="button" data-action="refresh">刷新全部</button>
+          </div>
+
+          <div class="control-group">
+            <h2>Business Items</h2>
+            <button type="button" data-action="business-create">新增业务</button>
+            <button type="button" data-action="business-list">查询业务列表</button>
+            <button type="button" data-action="business-get">查询选中业务</button>
+            <button type="button" data-action="business-update">更新选中业务</button>
+            <button type="button" data-action="business-remove">删除最后业务</button>
+          </div>
+
+          <div class="control-group">
+            <h2>Extras</h2>
+            <button type="button" data-action="extra-create">新增 Extra</button>
+            <button type="button" data-action="extra-list">查询 Extra 列表</button>
+            <button type="button" data-action="extra-get">查询选中 Extra</button>
+            <button type="button" data-action="extra-update">更新选中 Extra</button>
+            <button type="button" data-action="extra-remove">删除最后 Extra</button>
+          </div>
+        </aside>
+
+        <section class="data-view">
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Business Items</h2>
+              <span id="business-count">0 rows</span>
+            </div>
+            <div id="business-list" class="list" aria-live="polite"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Extras</h2>
+              <span id="extra-count">0 rows</span>
+            </div>
+            <div id="extra-list" class="list" aria-live="polite"></div>
+          </div>
+
+          <div class="panel log-panel">
+            <div class="panel-header">
+              <h2>Last Result</h2>
+              <span id="status">ready</span>
+            </div>
+            <pre id="result">{}</pre>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>

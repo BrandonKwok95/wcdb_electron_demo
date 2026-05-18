@@ -1,0 +1,14 @@
+#include "extra.h"
+
+namespace kwok::wcdb_addon {
+
+WCDB_CPP_ORM_IMPLEMENTATION_BEGIN(Extra)
+WCDB_CPP_SYNTHESIZE(id)
+WCDB_CPP_SYNTHESIZE(businessItemId)
+WCDB_CPP_SYNTHESIZE(key)
+WCDB_CPP_SYNTHESIZE(value)
+WCDB_CPP_SYNTHESIZE(updatedAt)
+WCDB_CPP_PRIMARY_ASC_AUTO_INCREMENT(id)
+WCDB_CPP_ORM_IMPLEMENTATION_END
+
+} // namespace kwok::wcdb_addon

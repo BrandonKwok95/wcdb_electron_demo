@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+out/
+release/
+coverage/
+*.tsbuildinfo
+
+# Native addon / node-gyp outputs
+build/
+**/build/
+*.obj
+*.pdb
+*.exp
+*.ilk
+*.ipdb
+*.iobj
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+apps/electron-demo/dev-data/
+packages/wcdb-addon/dev-data/
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+
+# Keep vendored WCDB binaries and headers tracked.
+!packages/wcdb-addon/vendor/
+!packages/wcdb-addon/vendor/**

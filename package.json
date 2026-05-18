@@ -1,0 +1,21 @@
+{
+  "name": "wcdb-electron-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monorepo for an Electron demo and WCDB Node addon integration.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:electron": "npm run dev -w @wcdb-demo/electron",
+    "start:electron": "npm run start -w @wcdb-demo/electron",
+    "build:wcdb-addon": "npm run build -w @kwok/wcdb-addon",
+    "test:wcdb-addon": "npm run test -w @kwok/wcdb-addon"
+  },
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "node-addon-api": "^8.3.1",
+    "node-gyp": "^11.2.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@kwok/wcdb-addon",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "node-gyp configure build",
+    "test": "node test/smoke.js"
+  },
+  "gypfile": true
+}
